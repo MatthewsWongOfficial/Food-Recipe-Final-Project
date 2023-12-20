@@ -1,4 +1,5 @@
-# Getting Started with Create React App
+Client Side Web Programming Final Project
+Made By : Matthews Wong , Bryant Aryadi , Nabhan Yahya Anuz
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
