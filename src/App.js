@@ -36,22 +36,29 @@ function App() {
   return (
     <Router>
       <nav>
-        {currentUser ? (
-          <>
-            <span>Welcome, {currentUser.displayName || 'User'}</span>
-            <img src={currentUser.photoURL || 'default-profile.png'} alt="Profile" style={{ width: '30px', height: '30px', borderRadius: '50%' }} />
-            <button onClick={handleLogout}>Log Out</button>
-            <Link to="/profile">Profile</Link>
-            <Link to="/categories">Categories</Link>
-            <Link to="/">Recipe Search</Link>
-          </>
-        ) : (
-          <>
-            <Link to="/signin">Sign In</Link>
-            <Link to="/signup">Sign Up</Link>
-          </>
-        )}
-      </nav>
+  <div className="nav-left">
+    <Link to="/categories">Categories</Link>
+    <Link to="/">Recipe Search</Link>
+  </div>
+  <div className="nav-right">
+    {currentUser ? (
+      <span className="user-profile">
+        <Link to="/profile">
+          <img src={currentUser.photoURL || 'default-profile.png'} alt="Profile" />
+        </Link>
+        <span>Welcome, {currentUser.displayName || 'User'}</span>
+        <button onClick={handleLogout}>Log Out</button>
+      </span>
+    ):(
+      <>
+      <Link to="/signin">Sign In</Link>
+      <Link to="/signup">Sign Up</Link>
+    </>
+  )}
+  </div>
+</nav>
+
+
       <Routes>
         <Route path="/" element={<RecipeSearch searchTerm={searchTerm} performSearch={performSearch} />} />
         <Route path="/recipe/:id" element={<ViewRecipe />} /> {/* Route for viewing individual recipes */}
