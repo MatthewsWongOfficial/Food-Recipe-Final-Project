@@ -30,25 +30,18 @@ const SignIn = () => {
   };
 
   return (
-    <form onSubmit={handleSignIn}>
-      <label>
-        {/* Email: */}
+    <div>
+      <form onSubmit={handleSignIn}>
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
-      </label>
-      <label>
-        {/* Password: */}
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          required
-        />
-      </label>
-      <button type="submit">Sign In</button>
-      <button onClick={handleSignInWithGoogle}>Sign In with Google</button>
-    </form>
-  );
+        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required />
+  
+        <div className="button-container">
+          <button type="submit">Sign In</button>
+          <button onClick={handleSignInWithGoogle}>Sign In with Google</button>
+        </div>
+      </form>
+    </div>
+  );  
 };
 
 export default SignIn;

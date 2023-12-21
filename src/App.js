@@ -6,6 +6,8 @@ import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 import RecipeSearch from './components/RecipeSearch';
 import UserProfile from './components/UserProfile';
+import NavBar from './components/NavBar';
+
 import './App.css';
 
 function App() {
@@ -13,7 +15,6 @@ function App() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log('Current User:', user);
       setCurrentUser(user);
     });
     return unsubscribe;
@@ -29,36 +30,30 @@ function App() {
 
   return (
     <Router>
-      <div className="App">
-        {/* Inside the left-bar div */}
-        <div className="left-bar">
+      <div className="app-container">
+        <NavBar handleLogout={handleLogout} />
+        <div className="content">
           {currentUser ? (
             <>
               <span>Welcome, {currentUser.displayName || 'User'}</span>
-              <img
-                src={currentUser.photoURL || 'default-profile.png'}
-                alt="Profile"
-                style={{ width: '30px', height: '30px', borderRadius: '50%' }}
-              />
-              <button onClick={handleLogout}>Log Out</button>
-              <Link to="/profile">Profile</Link>
+              <Routes>
+                <Route
+                  path="/"
+                  element={<RecipeSearch currentUser={currentUser} />}
+                />
+                <Route
+                  path="/profile"
+                  element={<UserProfile currentUser={currentUser} />}
+                />
+              </Routes>
             </>
           ) : (
-            <>
-              <Link to="/signin">Sign In</Link>
-              <Link to="/signup">Sign Up</Link>
-            </>
+            <Routes>
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/" element={<RecipeSearch />} />
+            </Routes>
           )}
-          <Link to="/">Recipe Search</Link>
-        </div>
-
-        <div className="content">
-          <Routes>
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/" element={<RecipeSearch />} />
-            <Route path="/profile" element={<UserProfile />} />
-          </Routes>
         </div>
       </div>
     </Router>

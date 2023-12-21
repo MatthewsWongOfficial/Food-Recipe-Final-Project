@@ -1,17 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import '../App.css'; // Adjust the path to reach App.css from components folder
-import { auth } from '../firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../firebase'; // Adjust the path as necessary
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { Route, Routes } from 'react-router-dom';
+import UserProfile from './UserProfile';
 
-const RecipeSearch = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+const RecipeCard = ({ recipe, onViewRecipe }) => (
+  <div className="recipe-card">
+    <img src={recipe.strMealThumb} alt={recipe.strMeal} style={{ width: '100px', height: '100px', borderRadius: '8px' }} />
+    <p>{recipe.strMeal}</p>
+    <button onClick={() => onViewRecipe(recipe)}>View Recipe</button>
+  </div>
+);
+
+const RecipeSearch = ({ currentUser, onSearchHistoryClick }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [recipes, setRecipes] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
+  // const [currentUser, setCurrentUser] = useState(null);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [ingredients, setIngredients] = useState([]);
-  const [searchHistory, setSearchHistory] = useState([]); // Define searchHistory state
+
+  // Fetch random recipes when the component mounts
+  useEffect(() => {
+    const fetchRandomRecipes = async () => {
+      const response = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
+      const data = await response.json();
+      if (data.meals) {
+        setRecipes(data.meals);
+      }
+    };
+
+    fetchRandomRecipes();
+  }, []);
 
   // Listen for authentication state changes
   useEffect(() => {
@@ -27,19 +46,12 @@ const RecipeSearch = () => {
   }, []);
 
   const fetchRecipes = async (searchTerm) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${searchTerm}`);
-      const data = await response.json();
-      if (data.meals) {
-        setRecipes(data.meals);
-      } else {
-        setRecipes([]);
-      }
-    } catch (error) {
-      setError("Error fetching recipes. Please try again.");
-    } finally {
-      setLoading(false);
+    const response = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${searchTerm}`);
+    const data = await response.json();
+    if (data.meals) {
+      setRecipes(data.meals);
+    } else {
+      setRecipes([]);
     }
   };
 
@@ -66,10 +78,9 @@ const RecipeSearch = () => {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    setError(null); // Clear previous errors
     await fetchRecipes(searchTerm);
-    setSelectedRecipe(null); // Clear selected recipe when performing a new search
-    setIngredients([]); // Clear ingredients when performing a new search
+    setSelectedRecipe(null);
+    setIngredients([]);
     if (currentUser) {
       saveSearchHistory(currentUser.uid, searchTerm);
     }
@@ -87,83 +98,104 @@ const RecipeSearch = () => {
     // Load and handle search history if needed
   };
 
+  // ini wkt click history yaaa
+  const handleSearchHistoryClick = (searchTerm) => {
+    setSearchTerm(searchTerm);
+    fetchRecipes(searchTerm);
+    setSelectedRecipe(null);
+    setIngredients([]);
+  };
+
   const handleViewRecipe = (recipe) => {
     setSelectedRecipe(recipe);
     fetchIngredients(recipe.idMeal);
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
   return (
-    <>
-      <div className="left-bar">
-        <h3>Search History</h3>
-        <ul>
-          {/* Display search history items here */}
-          {searchHistory.length > 0 ? (
-            searchHistory.map((item, index) => (
-              <li key={index}>
-                <a href="#">{item}</a>
-              </li>
-            ))
-          ) : (
-            <p>No search history.</p>
-          )}
-        </ul>
-      </div>
-  
-      <div className="content">
-      {loading && <p>Loading...</p>}
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+    <div>
+      {/* {currentUser && (
+        <div style={{ textAlign: 'right' }}>
+          <span>{`Welcome, ${currentUser.displayName || 'User'}`}</span>
+          <button onClick={handleLogout}>Log Out</button>
+        </div>
+      )} */}
 
-        {currentUser && (
-          <div style={{ textAlign: 'right' }}>
-            <span>{currentUser.displayName}</span>
-            <img src={currentUser.photoURL} alt="Profile" style={{ width: '30px', height: '30px', borderRadius: '50%' }} />
-          </div>
-        )}
-
-        <form onSubmit={handleSearch}>
-          <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search for recipes" />
+      <form onSubmit={handleSearch}>
+        <div className="button-container">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search for recipes"
+          />
           <button type="submit">Search</button>
-        </form>
-        
-        <div>
-          {selectedRecipe ? (
-            <div>
-              <h2>{selectedRecipe.strMeal}</h2>
-              <img src={selectedRecipe.strMealThumb} alt={selectedRecipe.strMeal} style={{ width: '200px', height: '200px' }} />
-              {/* Display recipe details here */}
-              <p>Category: {selectedRecipe.strCategory}</p>
-              <p>Area: {selectedRecipe.strArea}</p>
-              <p>Instructions: {selectedRecipe.strInstructions}</p>
-              {/* Display ingredients and their images */}
-              <h3>Ingredients:</h3>
-              <ul>
-                {ingredients.map((ingredient, index) => (
-                  <li key={index}>
-                    {ingredient.name} <img src={ingredient.image} alt={ingredient.name} style={{ width: '30px', height: '30px' }} />
-                  </li>
-                ))}
-              </ul>
-              {/* Add more details as needed */}
-              <button onClick={() => setSelectedRecipe(null)}>Back to Search</button>
-            </div>
-          ) : recipes.length > 0 ? (
+        </div>
+      </form>
+
+      <div className="recipe-cards-container">
+        {recipes.map((recipe) => (
+          <RecipeCard key={recipe.idMeal} recipe={recipe} onViewRecipe={handleViewRecipe} />
+        ))}
+      </div>
+      
+      {/* <div> */}
+        {selectedRecipe ? (
+          <div>
+            <h2>{selectedRecipe.strMeal}</h2>
+            <img src={selectedRecipe.strMealThumb} alt={selectedRecipe.strMeal} style={{ width: '200px', height: '200px' }} />
+            {/* Display recipe details here */}
+            <p>Category: {selectedRecipe.strCategory}</p>
+            <p>Area: {selectedRecipe.strArea}</p>
+            <p>Instructions: {selectedRecipe.strInstructions}</p>
+            {/* Display ingredients and their images */}
+            <h3>Ingredients:</h3>
             <ul>
-              {recipes.map((recipe) => (
-                <li key={recipe.idMeal}>
-                  <img src={recipe.strMealThumb} alt={recipe.strMeal} style={{ width: '100px', height: '100px' }} />
-                  <p>{recipe.strMeal}</p>
-                  <button onClick={() => handleViewRecipe(recipe)}>View Recipe</button>
+              {ingredients.map((ingredient, index) => (
+                <li key={index}>
+                  {ingredient.name} <img src={ingredient.image} alt={ingredient.name} style={{ width: '30px', height: '30px' }} />
                 </li>
               ))}
             </ul>
-          ) : (
-            <p>No recipes found. Try a different search!</p>
-          )}
-        </div>
-      </div>
-    </>
-  );  
+            {/* Add more details as needed */}
+            <button onClick={() => setSelectedRecipe(null)}>Back to Search</button>
+          </div>
+        ) : null}
+    </div>
+  );
 };
 
-export default RecipeSearch;
+const RecipeSearchWrapper = () => {
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return unsubscribe;
+  }, []);
+
+  return (
+    <div className="content">
+      <Routes>
+        <Route
+          path="/"
+          element={<RecipeSearch currentUser={currentUser} />}
+        />
+        <Route
+          path="/profile"
+          element={<UserProfile currentUser={currentUser} onSearchHistoryClick={handleSearchHistoryClick} />}
+        />
+      </Routes>
+    </div>
+  );
+};
+
+export default RecipeSearchWrapper;
