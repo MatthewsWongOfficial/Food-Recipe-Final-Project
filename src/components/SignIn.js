@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from '../firebase';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
@@ -14,7 +14,7 @@ const SignIn = () => {
       // Handle successful Google sign-in
     } catch (error) {
       // Handle errors
-      console.error('Error signing in with Google', error);
+      console.error("Error signing in with Google", error);
     }
   };
 
@@ -25,23 +25,24 @@ const SignIn = () => {
       // Handle successful login (e.g., redirect to home page)
     } catch (error) {
       // Handle errors (e.g., display error message)
-      console.error('Error signing in with email and password', error);
+      console.error("Error signing in with email and password", error);
     }
   };
 
   return (
-    <div>
-      <form onSubmit={handleSignIn}>
+    <div className="sign-form">
+      <div className="input-container">
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
+      </div>
+
+      <div className="input-container">
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required />
-  
-        <div className="button-container">
-          <button type="submit">Sign In</button>
-          <button onClick={handleSignInWithGoogle}>Sign In with Google</button>
-        </div>
-      </form>
+      </div>
+
+      <button type="submit" className="sign-button">Sign In</button>
+      <button onClick={handleSignInWithGoogle} className="sign-button">Sign In with Google</button>
     </div>
-  );  
+  );
 };
 
 export default SignIn;
