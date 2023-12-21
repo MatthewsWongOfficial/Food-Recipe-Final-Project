@@ -1,16 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { auth } from '../firebase'; // Adjust the path as necessary
 
-const UserProfile = ({ performSearch }) => {
-  const [searchHistory, setSearchHistory] = useState([]);
-
-  useEffect(() => {
-    if (auth.currentUser) {
-      const historyKey = `searchHistory-${auth.currentUser.uid}`;
-      const history = JSON.parse(localStorage.getItem(historyKey)) || [];
-      setSearchHistory(history);
-    }
-  }, []);
+const UserProfile = ({ performSearch, searchHistory }) => {
 
   // Function to handle click on a search history item
   const handleHistoryItemClick = (item) => {
@@ -23,15 +14,14 @@ const UserProfile = ({ performSearch }) => {
       {auth.currentUser ? (
         <div>
           <h2>{auth.currentUser.displayName || 'User'}</h2>
-          <p>Email: {auth.currentUser.email}</p>
           <div>
             <h3>Search History</h3>
             <ul>
-            {searchHistory.length > 0 ? (
-            searchHistory.map((item, index) => (
-              <li key={index}>
-                <button onClick={() => handleHistoryItemClick(item)}>{item}</button>
-              </li>
+              {searchHistory.length > 0 ? (
+                searchHistory.map((item, index) => (
+                  <li key={index}>
+                    <button onClick={() => handleHistoryItemClick(item)}>{item}</button>
+                  </li>
                 ))
               ) : (
                 <p>No search history.</p>
