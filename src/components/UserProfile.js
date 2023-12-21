@@ -20,18 +20,20 @@ const UserProfile = () => {
         <div>
           <h2>{auth.currentUser.displayName || 'User'}</h2>
           <p>Email: {auth.currentUser.email}</p>
-          <div>
-            <h3>Search History</h3>
-            <ul>
-              {searchHistory.length > 0 ? (
-                searchHistory.map((item, index) => <li key={index}>{item}</li>)
-              ) : (
-                <p>No search history.</p>
-              )}
-            </ul>
-          </div>
+          <h3>Search History</h3>
+
+          <ul>
+            {searchHistory.length > 0 ? (
+              searchHistory.map((item, index) => <li key={index}>{item}</li>)
+            ) : (
+              <p>No search history.</p>
+            )}
+          </ul>
+          
         </div>
-      ) : (
+      ) 
+      
+      : (
         <p>Please log in to view your profile.</p>
       )}
     </div>

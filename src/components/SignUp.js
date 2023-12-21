@@ -29,14 +29,16 @@ const SignUp = () => {
   };
 
   return (
-    <div>
+    // <div>
       <form onSubmit={handleSignUpWithEmail}>
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required />
         <button type="submit">Sign Up with Email</button>
+
+        <button onClick={handleSignUpWithGoogle}>Sign Up with Google</button>
       </form>
-      <button onClick={handleSignUpWithGoogle}>Sign Up with Google</button>
-    </div>
+      // <button onClick={handleSignUpWithGoogle}>Sign Up with Google</button>
+    // </div>
   );
 };
 
