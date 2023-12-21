@@ -9,6 +9,8 @@ import UserProfile from './components/UserProfile';
 import FoodCategories from './components/FoodCategories';
 import ViewRecipe from './components/ViewRecipe'; // Import ViewRecipe component
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);

@@ -58,26 +58,36 @@ const FoodCategories = () => {
   };
 
   return (
-    <div>
-      <nav>
-        {categories.map((category) => (
-          <button key={category.idCategory} onClick={() => handleCategoryClick(category)}>
-            {category.strCategory}
-          </button>
-        ))}
+    <div className="container">
+      <nav className="navbar navbar-expand-lg navbar-light bg-light">
+        <div className="navbar-nav">
+          {categories.map((category) => (
+            <button 
+              key={category.idCategory} 
+              className="nav-item nav-link btn btn-link" 
+              onClick={() => handleCategoryClick(category)}
+            >
+              {category.strCategory}
+            </button>
+          ))}
+        </div>
       </nav>
-      <div>
-        {/* Search input and button */}
+
+      <div className="mt-3">
+        {/* Include your search input and button here, styled with Bootstrap */}
       </div>
+
       {selectedCategory && (
-        <div>
+        <div className="mt-4">
           <h2>Dishes in {selectedCategory.strCategory}</h2>
-          <div className="dish-list">
+          <div className="row">
             {dishes.map((dish) => (
-              <div key={dish.idMeal} onClick={() => handleDishClick(dish.strMeal)}>
-                <Link to={`/recipe-search/${dish.strMeal}`}>
-                  <img src={dish.strMealThumb} alt={dish.strMeal} />
-                  <p>{dish.strMeal}</p>
+              <div key={dish.idMeal} className="col-md-4 mb-3" onClick={() => handleDishClick(dish.strMeal)}>
+                <Link to={`/recipe-search/${dish.strMeal}`} className="card">
+                  <img src={dish.strMealThumb} alt={dish.strMeal} className="card-img-top" />
+                  <div className="card-body">
+                    <p className="card-text">{dish.strMeal}</p>
+                  </div>
                 </Link>
               </div>
             ))}

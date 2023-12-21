@@ -6,8 +6,8 @@ const RecipeSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [recipes, setRecipes] = useState([]);
   const [searchHistory, setSearchHistory] = useState([]);
-  const [selectedRecipe, setSelectedRecipe] = useState(null); // Track the selected recipe
-  const navigate = useNavigate();
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const historyKey = 'searchHistory';
@@ -46,56 +46,96 @@ const RecipeSearch = () => {
     setSearchHistory([]);
   };
 
-  const handleViewRecipeClick = (recipeId) => {
-    setSelectedRecipe(recipes.find(recipe => recipe.idMeal === recipeId));
+  const handleViewRecipeClick = async (recipeId) => {
+    try {
+      const response = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${recipeId}`);
+      const data = await response.json();
+      if (data.meals && data.meals.length > 0) {
+        setSelectedRecipe(data.meals[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching recipe details:', error);
+    }
+  };
+
+  const handleSearchHistoryClick = (term) => {
+    setSearchTerm(term);
+    performSearch(term);
   };
 
   return (
-    <div className="recipe-search-container">
-      {/* Include UserProfile component */}
-      <UserProfile performSearch={performSearch} searchHistory={searchHistory} />
-      <div className="search-results">
-        <form onSubmit={(e) => { e.preventDefault(); performSearch(searchTerm); }}>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search for recipes"
-          />
-          <button type="submit">Search</button>
-        </form>
-        <div className="recipes">
-          {recipes.map(recipe => (
-            <div key={recipe.idMeal}>
-              <h3>{recipe.strMeal}</h3>
-              <img src={recipe.strMealThumb} alt={recipe.strMeal} />
-              <button onClick={() => handleViewRecipeClick(recipe.idMeal)}>View Recipe</button>
-            </div>
-          ))}
+    <div className="container-fluid mt-3">
+      <div className="row">
+        {/* Left Panel: Search History */}
+        <div className="col-md-3 bg-light min-vh-100">
+          <h5 className="mt-4 mb-3">Search History</h5>
+          <div className="list-group">
+            {searchHistory.map((term, index) => (
+              <button
+                key={index}
+                className="list-group-item list-group-item-action"
+                onClick={() => handleSearchHistoryClick(term)} // Clicking a history item performs a search
+              >
+                {term}
+              </button>
+            ))}
+          </div>
+          <button onClick={clearSearchHistory} className="btn btn-danger mt-3">Clear History</button>
         </div>
-        <button onClick={clearSearchHistory}>Clear History</button>
-      </div>
-      {/* Display the selected recipe details */}
-      {selectedRecipe && (
-  <div className="selected-recipe-details">
-    <h2>{selectedRecipe.strMeal}</h2>
-    <img src={selectedRecipe.strMealThumb} alt={selectedRecipe.strMeal} />
-    {/* Display ingredients here */}
-    <ul>
-      {Array.from({ length: 20 }, (_, i) => i + 1).map((index) => {
-        const ingredient = selectedRecipe[`strIngredient${index}`];
-        const measure = selectedRecipe[`strMeasure${index}`];
-        return ingredient && <li key={index}>{`${measure} ${ingredient}`}</li>;
-      })}
-    </ul>
-    {/* Display instructions */}
-    <div>
-      <h3>Instructions</h3>
-      <p>{selectedRecipe.strInstructions}</p>
-    </div>
-  </div>
-)}
 
+        {/* Right Panel: Recipe Details */}
+        <div className="col-md-9">
+          {/* Search Bar */}
+          <div className="input-group mb-3">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search for recipes"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <button
+              className="btn btn-outline-secondary"
+              type="button"
+              onClick={() => performSearch(searchTerm)}
+            >
+              Search
+            </button>
+          </div>
+
+          {/* Recipes List */}
+          <div className="recipes">
+            {recipes.map(recipe => (
+              <div key={recipe.idMeal} className="card mb-3" style={{ cursor: 'pointer' }}>
+                <div className="card-body" onClick={() => handleViewRecipeClick(recipe.idMeal)}>
+                  <h5 className="card-title">{recipe.strMeal}</h5>
+                  <img src={recipe.strMealThumb} alt={recipe.strMeal} className="img-fluid" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Selected Recipe Details */}
+          {selectedRecipe && (
+            <div className="mt-4">
+              <h2>{selectedRecipe.strMeal}</h2>
+              <img src={selectedRecipe.strMealThumb} alt={selectedRecipe.strMeal} className="img-fluid" />
+              <div className="mt-3">
+                <h3>Ingredients:</h3>
+                <ul className="list-group list-group-flush">
+                  {Array.from({ length: 20 }, (_, i) => i + 1).map((index) => {
+                    const ingredient = selectedRecipe[`strIngredient${index}`];
+                    const measure = selectedRecipe[`strMeasure${index}`];
+                    return ingredient && <li key={index} className="list-group-item">{`${measure} ${ingredient}`}</li>;
+                  })}
+                </ul>
+                <h3 className="mt-3">Instructions:</h3>
+                <p>{selectedRecipe.strInstructions}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
