@@ -9,26 +9,22 @@ const RecipeSearch = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch and set search history from localStorage
-    const historyKey = 'searchHistory'; // Adjust key as necessary
+    const historyKey = 'searchHistory';
     const history = JSON.parse(localStorage.getItem(historyKey)) || [];
     setSearchHistory(history);
   }, []);
 
   const performSearch = async (term) => {
-    if (!term || term.length < 3) return; // Prevent empty or too short search terms
+    if (!term || term.length < 3) return;
 
     try {
       const response = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${term}`);
       const data = await response.json();
-
       if (!data.meals) {
-        alert("Food is unavailable."); // Alert if no meals are found
+        alert("Food is unavailable.");
         return;
       }
-
       setRecipes(data.meals);
-      setSearchTerm(term);
       storeSearchHistory(term);
     } catch (error) {
       console.error('Error fetching recipes:', error);
@@ -36,16 +32,15 @@ const RecipeSearch = () => {
   };
 
   const storeSearchHistory = (term) => {
-    if (!term || term.length < 3) return; // Duplicate check for safety
-
-    const updatedHistory = [term, ...searchHistory.filter(t => t !== term)]; // Add new term at the top, remove duplicates
-    const historyKey = 'searchHistory'; // Adjust key as necessary
+    if (!term || term.length < 3) return;
+    const updatedHistory = [term, ...searchHistory.filter(t => t !== term)];
+    const historyKey = 'searchHistory';
     localStorage.setItem(historyKey, JSON.stringify(updatedHistory));
     setSearchHistory(updatedHistory);
   };
 
   const clearSearchHistory = () => {
-    const historyKey = 'searchHistory'; // Adjust key as necessary
+    const historyKey = 'searchHistory';
     localStorage.setItem(historyKey, JSON.stringify([]));
     setSearchHistory([]);
   };
@@ -55,37 +50,31 @@ const RecipeSearch = () => {
   };
 
   return (
-  <div className="recipe-search-container">
-    <UserProfile performSearch={performSearch} searchHistory={searchHistory} />
-    <div className="search-results">
-      <form onSubmit={(e) => { e.preventDefault(); performSearch(searchTerm); }}>
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search for recipes"
-        />
-        <button type="submit">Search</button>
-      </form>
-      <div className="recipes">
-        {recipes && recipes.map(recipe => (
-          <div key={recipe.idMeal} className="recipe-item">
-            <h3>{recipe.strMeal}</h3>
-            <img src={recipe.strMealThumb} alt={recipe.strMeal} />
-            <button onClick={() => handleViewRecipeClick(recipe.idMeal)}>View Recipe</button>
-          </div>
-        ))}
-        {!recipes && (
-          <div>No recipes found. Try a different search.</div>
-        )}
+    <div className="recipe-search-container">
+      <UserProfile performSearch={performSearch} searchHistory={searchHistory} />
+      <div className="search-results">
+        <form onSubmit={(e) => { e.preventDefault(); performSearch(searchTerm); }}>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search for recipes"
+          />
+          <button type="submit">Search</button>
+        </form>
+        <div className="recipes">
+          {recipes.map(recipe => (
+            <div key={recipe.idMeal}>
+              <h3>{recipe.strMeal}</h3>
+              <img src={recipe.strMealThumb} alt={recipe.strMeal} />
+              <button onClick={() => handleViewRecipeClick(recipe.idMeal)}>View Recipe</button>
+            </div>
+          ))}
+        </div>
+        <button onClick={clearSearchHistory}>Clear History</button>
       </div>
-      <button onClick={() => clearSearchHistory()} className="clear-history-button">
-        Clear History
-      </button>
     </div>
-  </div>
-);
-
+  );
 };
 
 export default RecipeSearch;

@@ -1,11 +1,11 @@
 import React from 'react';
 import { auth } from '../firebase'; // Adjust the path as necessary
 
-const UserProfile = ({ performSearch, searchHistory }) => {
+const UserProfile = ({ performSearch, searchHistory = [] }) => {
+  // The default value [] ensures searchHistory is always an array
 
-  // Function to handle click on a search history item
   const handleHistoryItemClick = (item) => {
-    performSearch(item); // This function should update the search term in RecipeSearch and perform the search
+    performSearch(item);
   };
 
   return (

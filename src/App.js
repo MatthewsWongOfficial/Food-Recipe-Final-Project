@@ -41,7 +41,7 @@ function App() {
             <span>Welcome, {currentUser.displayName || 'User'}</span>
             <img src={currentUser.photoURL || 'default-profile.png'} alt="Profile" style={{ width: '30px', height: '30px', borderRadius: '50%' }} />
             <button onClick={handleLogout}>Log Out</button>
-            <Link to="/profile">Profile</Link>
+            {/* Removed Profile Link */}
             <Link to="/categories">Categories</Link>
             <Link to="/">Recipe Search</Link>
           </>
