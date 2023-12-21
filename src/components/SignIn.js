@@ -1,46 +1,92 @@
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from '../firebase';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { useNavigate, Link } from 'react-router-dom';
+import { auth } from '../firebase'; // Adjust the path as necessary
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import googleLogo from '../assets/google.png'; // Import the Google logo, adjust path as necessary
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  const handleSignInWithEmail = async (e) => {
+    e.preventDefault();
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate('/');
+    } catch (error) {
+      console.error("Error signing in with email and password", error);
+    }
+  };
 
   const handleSignInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      // Handle successful Google sign-in
+      navigate('/');
     } catch (error) {
-      // Handle errors
       console.error("Error signing in with Google", error);
     }
   };
 
-  const handleSignIn = async (e) => {
-    e.preventDefault();
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // Handle successful login (e.g., redirect to home page)
-    } catch (error) {
-      // Handle errors (e.g., display error message)
-      console.error("Error signing in with email and password", error);
-    }
-  };
-
   return (
-    <div className="sign-form">
-      <div className="input-container">
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
-      </div>
+    <div className="container mt-5">
+      <div className="row justify-content-center bg-white">
+        <div className="col-md-6">
+          <form className="sign-form" onSubmit={handleSignInWithEmail}>
+            <div className="mb-3">
+              <input
+                type="email"
+                className="form-control"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                required
+              />
+            </div>
 
-      <div className="input-container">
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required />
-      </div>
+            <div className="mb-3">
+              <input
+                type="password"
+                className="form-control"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                required
+              />
+            </div>
 
-      <button type="submit" className="sign-button">Sign In</button>
-      <button onClick={handleSignInWithGoogle} className="sign-button">Sign In with Google</button>
+            <button type="submit" className="btn btn-primary btn-block">
+              Sign In with Email
+            </button>
+
+            <div className="text-center mt-3">
+              <button
+                onClick={handleSignInWithGoogle}
+                className="btn btn-danger btn-block rounded-circle"
+                style={{
+                  backgroundColor: 'white',
+                  width: '50px',
+                  height: '50px',
+                }}
+              >
+                <img
+                  src={googleLogo}
+                  alt="Google Logo"
+                  className="google-logo img-fluid"
+                  style={{ maxWidth: '30px', maxHeight: '30px' }}
+                />
+              </button>
+              <p className="mt-2">Or sign in with Google</p>
+            </div>
+          </form>
+
+          <div className="text-center mt-4">
+            <span>Or if you don't have an account, please </span>
+            <Link to="/signup" style={{ color: 'red' }}>Sign Up</Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

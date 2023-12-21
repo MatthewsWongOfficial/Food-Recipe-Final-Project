@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate instead of useHistory
+import { useNavigate } from 'react-router-dom'; // Import useNavigate instead of useHistory
 
 const FoodCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -83,12 +83,12 @@ const FoodCategories = () => {
           <div className="row">
             {dishes.map((dish) => (
               <div key={dish.idMeal} className="col-md-4 mb-3" onClick={() => handleDishClick(dish.strMeal)}>
-                <Link to={`/recipe-search/${dish.strMeal}`} className="card">
+                <div className="card">
                   <img src={dish.strMealThumb} alt={dish.strMeal} className="card-img-top" />
                   <div className="card-body">
                     <p className="card-text">{dish.strMeal}</p>
                   </div>
-                </Link>
+                </div>
               </div>
             ))}
           </div>

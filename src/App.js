@@ -3,14 +3,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-ro
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import SignIn from './components/SignIn';
-import SignUp from './components/SignUp';
+import SignUp from './components/SignUp'; // Import SignUp component
 import RecipeSearch from './components/RecipeSearch';
 import UserProfile from './components/UserProfile';
 import FoodCategories from './components/FoodCategories';
 import ViewRecipe from './components/ViewRecipe'; // Import ViewRecipe component
-import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
+import './App.css';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -20,17 +20,16 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
     });
-  
+
     return () => {
-      // Unsubscribe when the component unmounts
       unsubscribe();
     };
-  }, [currentUser]); // Include currentUser in the dependency array
-  
+  }, []);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      setCurrentUser(null); // Reset the current user to null after logout
     } catch (error) {
       console.error('Error logging out:', error);
     }
@@ -42,32 +41,47 @@ function App() {
 
   return (
     <Router>
-      <nav>
-        {currentUser ? (
-          <>
-            <img src={currentUser.photoURL || 'default-profile.png'} alt="Profile" style={{ width: '30px', height: '30px', borderRadius: '50%' }} />
-            <span>Welcome, {currentUser.displayName || 'User'}</span>
-            {/* <button onClick={handleLogout}>Log Out</button> */}
-            <Link to="/categories" onClick={handleLogout}>Log Out</Link>
-            {/* Removed Profile Link */}
-            <Link to="/categories">Categories</Link>
-            <Link to="/">Recipe Search</Link>
-          </>
-        ) : (
-          <>
-            <Link to="/signin">Sign In</Link>
-            <Link to="/signup">Sign Up</Link>
-          </>
-        )}
+      <nav className="navbar navbar-expand-lg navbar-dark bg-black">
+        <div className="container">
+          <Link className="navbar-brand" to="/">
+            Recipe App
+          </Link>
+          {currentUser ? (
+            <div className="navbar-collapse">
+              <ul className="navbar-nav me-auto">
+                <li className="nav-item">
+                  <Link className="nav-link" to="/categories">
+                    Categories
+                  </Link>
+                </li>
+              </ul>
+              <Dropdown>
+                <Dropdown.Toggle variant="dark">
+                  <img
+                    src={currentUser.photoURL || 'default-profile.png'}
+                    alt="Profile"
+                    style={{ width: '30px', height: '30px', borderRadius: '50%' }}
+                  />
+                  &nbsp;{currentUser.displayName || 'User'}
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item onClick={handleLogout}>Log Out</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </div>
+          ) : null}
+        </div>
       </nav>
-      <Routes>
-        <Route path="/" element={<RecipeSearch searchTerm={searchTerm} performSearch={performSearch} />} />
-        <Route path="/recipe/:id" element={<ViewRecipe />} /> {/* Route for viewing individual recipes */}
-        <Route path="/signin" element={!currentUser ? <SignIn /> : <Navigate to="/" />} />
-        <Route path="/signup" element={!currentUser ? <SignUp /> : <Navigate to="/" />} />
-        <Route path="/profile" element={<UserProfile currentUser={currentUser} />} />
-        <Route path="/categories" element={currentUser ? <FoodCategories /> : <Navigate to="/signin" />} />
-      </Routes>
+      <div className="container mt-4">
+        <Routes>
+          <Route path="/" element={currentUser ? <RecipeSearch searchTerm={searchTerm} performSearch={performSearch} /> : <Navigate to="/signin" />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/recipe/:id" element={<ViewRecipe />} />
+          <Route path="/profile" element={currentUser ? <UserProfile currentUser={currentUser} /> : <Navigate to="/signin" />} />
+          <Route path="/categories" element={currentUser ? <FoodCategories /> : <Navigate to="/signin" />} />
+        </Routes>
+      </div>
     </Router>
   );
 }

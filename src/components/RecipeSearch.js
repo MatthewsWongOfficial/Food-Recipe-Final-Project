@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import UserProfile from './UserProfile';
+import { Link } from 'react-router-dom';
 
 const RecipeSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [recipes, setRecipes] = useState([]);
   const [searchHistory, setSearchHistory] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const historyKey = 'searchHistory';
@@ -22,7 +21,7 @@ const RecipeSearch = () => {
       const response = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${term}`);
       const data = await response.json();
       if (!data.meals) {
-        alert("Food is unavailable.");
+        alert('Food is unavailable.');
         return;
       }
       setRecipes(data.meals);
@@ -34,7 +33,7 @@ const RecipeSearch = () => {
 
   const storeSearchHistory = (term) => {
     if (!term || term.length < 3) return;
-    const updatedHistory = [term, ...searchHistory.filter(t => t !== term)];
+    const updatedHistory = [term, ...searchHistory.filter((t) => t !== term)];
     const historyKey = 'searchHistory';
     localStorage.setItem(historyKey, JSON.stringify(updatedHistory));
     setSearchHistory(updatedHistory);
@@ -74,13 +73,15 @@ const RecipeSearch = () => {
               <button
                 key={index}
                 className="list-group-item list-group-item-action"
-                onClick={() => handleSearchHistoryClick(term)} // Clicking a history item performs a search
+                onClick={() => handleSearchHistoryClick(term)}
               >
                 {term}
               </button>
             ))}
           </div>
-          <button onClick={clearSearchHistory} className="btn btn-danger mt-3">Clear History</button>
+          <button onClick={clearSearchHistory} className="btn btn-danger mt-3">
+            Clear History
+          </button>
         </div>
 
         {/* Right Panel: Recipe Details */}
@@ -104,12 +105,20 @@ const RecipeSearch = () => {
           </div>
 
           {/* Recipes List */}
-          <div className="recipes">
-            {recipes.map(recipe => (
-              <div key={recipe.idMeal} className="card mb-3" style={{ cursor: 'pointer' }}>
-                <div className="card-body" onClick={() => handleViewRecipeClick(recipe.idMeal)}>
-                  <h5 className="card-title">{recipe.strMeal}</h5>
-                  <img src={recipe.strMealThumb} alt={recipe.strMeal} className="img-fluid" />
+          <div className="row">
+            {recipes.map((recipe) => (
+              <div key={recipe.idMeal} className="col-md-4">
+                <div className="card mb-3">
+                  <img src={recipe.strMealThumb} alt={recipe.strMeal} className="card-img-top" />
+                  <div className="card-body">
+                    <h5 className="card-title">{recipe.strMeal}</h5>
+                    <Link
+                      to={`/recipe/${recipe.idMeal}`}
+                      className="btn btn-primary btn-sm"
+                    >
+                      View Recipe
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}
@@ -126,7 +135,9 @@ const RecipeSearch = () => {
                   {Array.from({ length: 20 }, (_, i) => i + 1).map((index) => {
                     const ingredient = selectedRecipe[`strIngredient${index}`];
                     const measure = selectedRecipe[`strMeasure${index}`];
-                    return ingredient && <li key={index} className="list-group-item">{`${measure} ${ingredient}`}</li>;
+                    return ingredient && (
+                      <li key={index} className="list-group-item">{`${measure} ${ingredient}`}</li>
+                    );
                   })}
                 </ul>
                 <h3 className="mt-3">Instructions:</h3>
